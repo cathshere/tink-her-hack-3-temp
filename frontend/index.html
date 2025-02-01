@@ -1,1 +1,144 @@
-hi
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Availability</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #A7C7E7; /* Pastel Blue */
+            color: black;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            max-width: 600px;
+            margin: auto;
+        }
+        select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+        }
+        select {
+            background: white;
+            color: black;
+            border: 2px solid #333;
+        }
+        button {
+            background: #FFD700; /* Gold */
+            color: black;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid #333;
+        }
+        button:hover {
+            background: #FFDF00;
+        }
+        .doctor-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .doctor-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            position: relative;
+            border-left: 10px solid #FFD700; /* Gold Highlight */
+        }
+        .doctor-card h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+        .doctor-card p {
+            margin: 5px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+        }
+        .doctor-number {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            background: #FFD700;
+            color: black;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 30px;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="font-weight: bold;">Find the Best Doctors</h2>
+        <label for="department" style="font-weight: bold;">Select Medical Department:</label>
+        <select id="department">
+            <option value="Cardiologist">Cardiologist</option>
+            <option value="Oncologist">Oncologist</option>
+            <option value="Neurologist">Neurologist</option>
+            <option value="Pulmonologist">Pulmonologist</option>
+            <option value="Pediatrician">Pediatrician</option>
+            <option value="Dermatologist">Dermatologist</option>
+            <option value="ENT Specialist">ENT Specialist</option>
+            <option value="Gynecologist">Gynecologist</option>
+            <option value="Psychologist">Psychologist</option>
+            <option value="Orthologist">Orthologist</option>
+        </select>
+        
+        <button onclick="findDoctors()">Search</button>
+        
+        <div id="doctor-list" class="doctor-list"></div>
+    </div>
+
+    <script>
+        const doctors = [
+            { name: "Dr. Smith", qualification: "MBBS, MD", hospital: "City Hospital", experience: "15 years", availability: "9 AM - 5 PM", rating: "4.8", department: "Cardiologist" },
+            { name: "Dr. Brown", qualification: "MBBS, MS", hospital: "Metro Hospital", experience: "12 years", availability: "10 AM - 6 PM", rating: "4.7", department: "Oncologist" },
+            { name: "Dr. Taylor", qualification: "MBBS, DM", hospital: "General Hospital", experience: "10 years", availability: "8 AM - 4 PM", rating: "4.6", department: "Neurologist" }
+        ];
+
+        function findDoctors() {
+            const doctorList = document.getElementById("doctor-list");
+            doctorList.innerHTML = "";
+            
+            doctors.slice(0, 3).forEach((doctor, index) => {
+                const doctorCard = document.createElement("div");
+                doctorCard.classList.add("doctor-card");
+                doctorCard.innerHTML = `
+                    <div class="doctor-number">${index + 1}</div>
+                    <h3>${doctor.name}</h3>
+                    <p><strong>Qualification:</strong> ${doctor.qualification}</p>
+                    <p><strong>Hospital:</strong> ${doctor.hospital}</p>
+                    <p><strong>Experience:</strong> ${doctor.experience}</p>
+                    <p><strong>Availability:</strong> ${doctor.availability}</p>
+                    <p><strong>Rating:</strong> ⭐${doctor.rating}</p>
+                `;
+                doctorList.appendChild(doctorCard);
+            });
+        }
+    </script>
+</body>
+</html>
+
