@@ -1,0 +1,6 @@
+[
+       {"id": 1, "name": "Dr. Alice Johnson", "specialization": "Cardiologist", "availability": "9 AM - 5 PM"},
+      {"id": 2, "name": "Dr. Bob Smith", "specialization": "Dermatologist", "availability": "10 AM - 6 PM"},
+       {"id": 3, "name": "Dr. Carol Lee", "specialization": "Pediatrician", "availability": "8 AM - 4 PM"}
+]
+    
