@@ -11,7 +11,7 @@
 - Member 3: Avantika Bizy Nair - MEC
 
 ### Hosted Project Link
-[mention your project hosted project link here]
+http://tink-her-hack-3-temp-alpha.vercel.app/
 
 ### Project Description
 This web application helps users quickly find the best available doctors by mapping their symptoms to relevant medical departments (e.g., chest pain → Cardiology). It shows top-rated doctors from different hospital types, providing real-time availability, ratings, and experience.
@@ -97,30 +97,9 @@ vercel login
 
 # Screenshots (Add at least 3)
 
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
-
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
-
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Team](Add photo of your team here)
-
-
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
+https://drive.google.com/file/d/1pIe2rbGGvtKn6W1_ac6-APz51Im12vrJ/view?usp=sharing
+https://drive.google.com/file/d/1DJLGOZCVtWWvzyJJsqoCDFrBKmoNBYoc/view?usp=sharing
+https://drive.google.com/file/d/1_1Vy4EdOYqUV9d0YZAdVzzgPzPcuzzsg/view?usp=sharing
 
 ### Project Demo
 # Video
@@ -129,7 +108,7 @@ https://drive.google.com/file/d/1X-Sm4FHER9vPntozSTqnPlCMpHBQm4Qd/view?usp=shari
 
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
+- [Catherine Abhiroop]: [Specific contributions]
 - [Name 2]: [Specific contributions]
 - [Name 3]: [Specific contributions]
 
