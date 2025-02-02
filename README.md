@@ -108,9 +108,9 @@ https://drive.google.com/file/d/1X-Sm4FHER9vPntozSTqnPlCMpHBQm4Qd/view?usp=shari
 
 
 ## Team Contributions
-- [Catherine Abhiroop]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- [Catherine Abhiroop]: mongoDB that is the database for the doctors listing
+- [Miliya]: backend that is the fast api 
+- [Avantika]: did the frontend using html, css
 
 ---
 Made with ❤️ at TinkerHub
