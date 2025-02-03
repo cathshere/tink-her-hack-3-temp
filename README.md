@@ -2,7 +2,7 @@
 
 
 ## Basic Details
-### Team Name: CATALYTS
+### Team Name: CATALYSTS
 
 
 ### Team Members
