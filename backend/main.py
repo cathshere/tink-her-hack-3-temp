@@ -1,20 +1,66 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from bson import ObjectId
+from pydantic import BaseModel
 from typing import List
 
+# MongoDB connection setup
+uri = "mongodb+srv://Miliya27:miliya00hlo@cluster0.qytcg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = MongoClient(uri, server_api=ServerApi('1'))
+db = client["doc-review"]
+collection = db["details"]
+
+# FastAPI app
 app = FastAPI()
 
-doctors = [
-    {"name": "Dr. John Smith", "qualification": "MBBS, MD", "hospital": "City Hospital", "experience": "15 years", "availability": "9 AM - 5 PM", "rating": 4.8, "department": "Cardiologist"},
-    {"name": "Dr. Alice Brown", "qualification": "MBBS, DM", "hospital": "Metro Hospital", "experience": "12 years", "availability": "10 AM - 6 PM", "rating": 4.7, "department": "Cardiologist"},
-    {"name": "Dr. Robert Taylor", "qualification": "MBBS, MD", "hospital": "General Hospital", "experience": "10 years", "availability": "8 AM - 4 PM", "rating": 4.6, "department": "Cardiologist"},
-    {"name": "Dr. Olivia Carter", "qualification": "MBBS, MD", "hospital": "City Hospital", "experience": "9 years", "availability": "10 AM - 5 PM", "rating": 4.7, "department": "Dermatologist"},
-    {"name": "Dr. Ethan Brown", "qualification": "MBBS, MD", "hospital": "Metro Hospital", "experience": "12 years", "availability": "9 AM - 3 PM", "rating": 4.8, "department": "Dermatologist"},
-    {"name": "Dr. Amelia Scott", "qualification": "MBBS, MD", "hospital": "General Hospital", "experience": "14 years", "availability": "8 AM - 4 PM", "rating": 4.9, "department": "Dermatologist"},
-    {"name": "Dr. Daniel Harris", "qualification": "PhD Psychology", "hospital": "Medical Trust", "experience": "12 years", "availability": "8 AM - 3 PM", "rating": 4.8, "department": "Psychologist"},
-    {"name": "Dr. Liam Bennett", "qualification": "MBBS, MS(Ortho)", "hospital": "Memorial Hospital", "experience": "14 years", "availability": "10 AM - 6 PM", "rating": 4.9, "department": "Orthologist"},
-]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (change to specific domain if needed)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
-@app.get("/doctors/{department}")
-def get_doctors(department: str):
-    filtered_doctors = [doc for doc in doctors if doc["department"].lower() == department.lower()]
-    return {"doctors": filtered_doctors[:3]}
+# Pydantic model for doctor data
+class Doctor(BaseModel):
+    doctor_id: str  # New field for MongoDB ObjectId
+    hospital: str
+    name: str
+    department: str
+    qualification: str
+    experience: int
+    availability: str
+    rating: float
+    contact: str
+
+# Route to add a new doctor with all required details
+@app.post("/doctors/")
+async def add_doctor(doctor: Doctor):
+    doctor_dict = doctor.dict()
+    result = collection.insert_one(doctor_dict)
+    return {"id": str(result.inserted_id), "message": "Doctor added successfully"}
+
+
+# Route to get all doctors
+@app.get("/doctors/", response_model=List[Doctor])
+async def get_all_doctors():
+    doctors = []
+    for doc in collection.find():
+        # Add new field doctor_id with the same value as _id
+        doc["doctor_id"] = str(doc["_id"])
+        doctors.append(doc)
+    
+    return doctors
+# Route to get a specific doctor by ID
+@app.get("/doctors/{doctor_id}")
+async def get_doctor(doctor_id: str):
+    try:
+        doctor = collection.find_one({"_id": ObjectId(doctor_id)})
+        if not doctor:
+            raise HTTPException(status_code=404, detail="Doctor not found")
+        doctor["_id"] = str(doctor["_id"])
+        return doctor
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid doctor ID")
