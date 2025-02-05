@@ -59,7 +59,7 @@
             box-shadow: 0px 2px 5px rgba(0,0,0,0.3);
             margin-bottom: 15px;
             position: relative;
-            border-left: 10px solid #87CEEB; /* Light Blue */
+            border-left: 10px solid #87CEEB;
             cursor: pointer;
         }
         .doctor-card h3 {
@@ -133,8 +133,16 @@
 <body>
     <div class="container">
         <h2>Find the Best Doctors</h2>
+
+        <!-- Symptom Input for Zero-Shot Classification -->
+        <label for="symptom-input">Enter Symptoms:</label>
+        <input type="text" id="symptom-input" placeholder="E.g., Chest pain, fever, anxiety">
+        <button onclick="classifySymptoms()">Classify</button>
+        <p><strong>Predicted Department:</strong> <span id="predicted-department">None</span></p>
+        
         <label for="department">Select Medical Department:</label>
         <select id="department">
+            <option value="All">All Departments</option>
             <option value="Cardiologist">Cardiologist</option>
             <option value="Oncologist">Oncologist</option>
             <option value="Neurologist">Neurologist</option>
@@ -146,7 +154,7 @@
             <option value="Psychologist">Psychologist</option>
             <option value="Orthologist">Orthologist</option>
         </select>
-        
+
         <button onclick="findDoctors()">Search</button>
         
         <div id="doctor-list" class="doctor-list"></div>
@@ -163,43 +171,118 @@
     </div>
 
     <script>
-        const doctors = [
-            { name: "Dr. Smith", hospital: "City Hospital", rating: "4.8", department: "Cardiologist", qualification: "MBBS, MD", experience: "15 years", availability: "9 AM - 5 PM", contact: "+91 9876543210", photo: "smith.jpg" },
-            { name: "Dr. Brown", hospital: "Metro Hospital", rating: "4.7", department: "Oncologist", qualification: "MBBS, MS", experience: "12 years", availability: "10 AM - 6 PM", contact: "+91 9876543211", photo: "brown.jpg" },
-            { name: "Dr. Taylor", hospital: "General Hospital", rating: "4.6", department: "Neurologist", qualification: "MBBS, DM", experience: "10 years", availability: "8 AM - 4 PM", contact: "+91 9876543212", photo: "taylor.jpg" }
-        ];
+        
+        async function query(data) {
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
+            {
+                headers: {
+                    "Authorization": "Bearer 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",  // Replace with your actual API key
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+        const result = await response.json();
+        return result;
+    }
 
-        function findDoctors() {
-            const doctorList = document.getElementById("doctor-list");
-            doctorList.innerHTML = "";
-            document.getElementById("doctor-details").style.display = "none"; 
-
-            doctors.slice(0, 3).forEach((doctor, index) => {
-                const doctorCard = document.createElement("div");
-                doctorCard.classList.add("doctor-card");
-                doctorCard.innerHTML = `
-                    <div class="doctor-number">${index + 1}</div>
-                    <h3 onclick="showDoctorDetails(${index})">${doctor.name}</h3>
-                    <p><strong>Hospital:</strong> ${doctor.hospital}</p>
-                    <p><strong>Rating:</strong> ⭐${doctor.rating}</p>
-                `;
-                doctorList.appendChild(doctorCard);
-            });
+    async function classifySymptoms() {
+        const symptomText = document.getElementById("symptom-input").value;
+        if (symptomText.trim().length < 3) {
+            document.getElementById("predicted-department").innerText = "Enter more details.";
+            return;
         }
 
-        function showDoctorDetails(index) {
-            const doctor = doctors[index];
+        const labels = [
+            "Cardiologist", "Oncologist", "Neurologist", "Pulmonologist",
+            "Pediatrician", "Dermatologist", "ENT Specialist", "Gynecologist",
+            "Psychologist", "Orthologist"
+        ];
 
-            document.getElementById("doctor-heading").innerHTML = `${doctor.name} <span>${doctor.department} | ${doctor.hospital}</span>`;
-            document.getElementById("doctor-photo").src = doctor.photo;
-            document.getElementById("doctor-qualification").innerText = doctor.qualification;
-            document.getElementById("doctor-experience").innerText = doctor.experience;
-            document.getElementById("doctor-availability").innerText = doctor.availability;
-            document.getElementById("doctor-rating").innerText = `⭐ ${doctor.rating}`;
-            document.getElementById("doctor-contact").innerText = doctor.contact;
+        try {
+            const response = await query({
+                "inputs": symptomText,
+                "parameters": { "candidate_labels": labels }
+            });
 
-            document.getElementById("doctor-details").style.display = "block";
-            document.getElementById("doctor-details").scrollIntoView({ behavior: "smooth", block: "start" });
+            if (response && response.labels && response.labels.length > 0) {
+                document.getElementById("predicted-department").innerText = response.labels[0];
+            } else {
+                document.getElementById("predicted-department").innerText = "No prediction available.";
+            }
+        } catch (error) {
+            console.error("Error classifying symptoms:", error);
+            document.getElementById("predicted-department").innerText = "Error occurred.";
+        }
+    }
+    async function findDoctors() {
+    const doctorList = document.getElementById("doctor-list");
+    doctorList.innerHTML = "";
+    document.getElementById("doctor-details").style.display = "none";
+
+    const selectedDepartment = document.getElementById("department").value;
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/doctors/");
+        const doctors = await response.json();
+
+        // Filter doctors based on selected department
+        let filteredDoctors = selectedDepartment === "All" 
+            ? doctors 
+            : doctors.filter(doctor => doctor.department === selectedDepartment);
+
+        // Sort doctors by rating, availability, and experience (descending order)
+        filteredDoctors.sort((a, b) => {
+            return (b.rating - a.rating) || (b.availability.localeCompare(a.availability)) || (b.experience - a.experience);
+        });
+
+        if (filteredDoctors.length === 0) {
+            doctorList.innerHTML = "<p>No doctors found in this department.</p>";
+            return;
+        }
+
+        filteredDoctors.forEach((doctor, index) => {
+            const doctorCard = document.createElement("div");
+            doctorCard.classList.add("doctor-card");
+            doctorCard.innerHTML = `
+                <div class="doctor-number">${index + 1}</div>
+                <h3 onclick="showDoctorDetails('${doctor.doctor_id}')">${doctor.name}</h3>
+                <p><strong>Hospital:</strong> ${doctor.hospital}</p>
+                <p><strong>Rating:</strong> ⭐${doctor.rating}</p>
+                <p><strong>Experience:</strong> ${doctor.experience} years</p>
+                <p><strong>Availability:</strong> ${doctor.availability}</p>
+            `;
+            doctorList.appendChild(doctorCard);
+        });
+    } catch (error) {
+        console.error("Error fetching doctors:", error);
+        doctorList.innerHTML = "<p>Failed to load doctors. Please try again later.</p>";
+    }
+}
+
+
+        async function showDoctorDetails(doctor_id) {
+            try {
+                const response = await fetch(http://127.0.0.1:8000/doctors/${doctor_id});
+                if (!response.ok) throw new Error("Doctor not found");
+
+                const doctor = await response.json();
+
+                document.getElementById("doctor-heading").innerHTML = ${doctor.name} <span>${doctor.department} | ${doctor.hospital}</span>;
+                document.getElementById("doctor-photo").src = "pf.jpg";
+                document.getElementById("doctor-qualification").innerText = doctor.qualification;
+                document.getElementById("doctor-experience").innerText = doctor.experience + " years";
+                document.getElementById("doctor-availability").innerText = doctor.availability;
+                document.getElementById("doctor-rating").innerText = ⭐ ${doctor.rating};
+                document.getElementById("doctor-contact").innerText = doctor.contact;
+
+                document.getElementById("doctor-details").style.display = "block";
+                document.getElementById("doctor-details").scrollIntoView({ behavior: "smooth", block: "start" });
+            } catch (error) {
+                alert("Doctor details not available.");
+            }
         }
     </script>
 </body>
